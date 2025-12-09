@@ -561,3 +561,101 @@ footer {
     padding: 20px;
   }
 }
+/* ===== Checkout visuals: Spinner, Success, Error, Invalid ===== */
+
+/* processing state on Checkout button */
+.payButton.processing {
+  pointer-events: none;
+  opacity: 0.95;
+  position: relative;
+}
+
+/* spinner inside the button */
+.payButton .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: rgba(255,255,255,1);
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* success overlay shown after a successful "checkout" */
+.order-success {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  transform: translateX(-50%);
+  background: white;
+  color: #222;
+  padding: 22px 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  z-index: 9999;
+  display: none;
+  text-align: center;
+  min-width: 300px;
+  font-family: "Lato", sans-serif;
+}
+
+.order-success.show {
+  display: block;
+  animation: pop 300ms ease-out;
+}
+
+@keyframes pop {
+  from { transform: translateX(-50%) translateY(-10px) scale(.97); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+}
+
+/* subtle green check mark style inside the success box */
+.order-success .check {
+  font-size: 40px;
+  color: #369e62;
+  margin-bottom: 8px;
+}
+
+/* error / shake animation for the payment box */
+.payment.error {
+  animation: shake 420ms;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+
+/* invalid input highlight */
+.payInput.invalid {
+  border-bottom-color: #e74c3c !important;
+  box-shadow: 0 2px 10px rgba(231,76,60,0.08);
+}
+
+/* invalid size / color visual (temporary flash) */
+.size.invalid {
+  animation: pulseInvalid 700ms;
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+@keyframes pulseInvalid {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* ensure spinner looks good on mobile too */
+@media screen and (max-width:480px) {
+  .order-success { min-width: 90%; left: 50%; top: 25%; }
+  .payButton .spinner { width: 16px; height: 16px; border-width: 2px; }
+}
