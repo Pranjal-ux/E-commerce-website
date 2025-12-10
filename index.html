@@ -136,25 +136,25 @@
             <button class="productButton" id="add-to-cart-btn">ADD TO CART</button>
         </div>
         <div class="payment">
-            <h1 class="payTitle">Personal Information</h1>
-            <label>Name and Surname</label>
-            <input type="text" placeholder="John Doe" class="payInput">
-            <label>Phone Number</label>
-            <input type="text" placeholder="+1 234 5678" class="payInput">
-            <label>Address</label>
-            <input type="text" placeholder="Elton St 21 22-145" class="payInput">
-            <h1 class="payTitle">Card Information</h1>
-            <div class="cardIcons">
-                <img src="./img/visa.png" width="40" alt="" class="cardIcon">
-                <img src="./img/master.png" alt="" width="40" class="cardIcon">
-            </div>
-            <input type="password" class="payInput" placeholder="Card Number">
-            <div class="cardInfo">
-                <input type="text" placeholder="mm" class="payInput sm">
-                <input type="text" placeholder="yyyy" class="payInput sm">
-                <input type="text" placeholder="cvv" class="payInput sm">
-            </div>
-            <button class="payButton">Checkout!</button>
+            <form id="checkout-form">
+                <h1 class="payTitle">Personal Information</h1>
+                <label>Full Name</label>
+                <input type="text" placeholder="John Doe" class="payInput" name="name" required>
+                <label>Phone Number</label>
+                <input type="tel" placeholder="+1 234 5678" class="payInput" name="phone" required>
+                <label>Address</label>
+                <input type="text" placeholder="123 Main St, City" class="payInput" name="address" required>
+                
+                <h1 class="payTitle" style="margin-top:20px;">Card Details</h1>
+                <label>Card Number</label>
+                <input type="text" placeholder="1234 5678 9012 3456" class="payInput" name="card" required>
+                <div class="cardInfo">
+                    <input type="text" placeholder="MM" class="payInput sm" name="mm" required maxlength="2">
+                    <input type="text" placeholder="YY" class="payInput sm" name="yyyy" required maxlength="2">
+                    <input type="text" placeholder="CVV" class="payInput sm" name="cvv" required maxlength="3">
+                </div>
+                <button type="submit" class="payButton">Checkout</button>
+            </form>
             <span class="close">X</span>
         </div>
     </div>

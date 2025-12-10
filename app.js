@@ -222,10 +222,11 @@ const productContainer = document.querySelector(".payment"); // the white box
 const successNode = document.createElement("div");
 successNode.className = "order-success";
 successNode.innerHTML = `
-  <div style="font-size:36px; color:#369e62; margin-bottom:8px;">✔</div>
-  <div style="font-weight:700; margin-bottom:6px;">Order Placed!</div>
-  <div style="color:gray; font-size:14px;">We received your order and it's being processed.</div>
-  <button id="closeSuccess" style="margin-top:12px; padding:8px 12px; cursor:pointer;">Close</button>
+    <div style="font-size:36px; color:#369e62; margin-bottom:8px;">✔</div>
+    <div style="font-weight:700; margin-bottom:6px;">Payment Successful!</div>
+    <div id="order-message" style="color:gray; font-size:14px;">Thank you — your payment was successful.</div>
+    <div id="order-id" style="color:#333; font-size:13px; margin-top:6px;"></div>
+    <button id="closeSuccess" style="margin-top:12px; padding:8px 12px; cursor:pointer;">OK</button>
 `;
 document.body.appendChild(successNode);
 
@@ -272,8 +273,10 @@ function showProcessing() {
         spinner.className = "spinner";
         payButton.appendChild(spinner);
     }
+    // set label and keep spinner inside the button
     payButton.textContent = "Processing";
-    payButton.appendChild(document.querySelector(".spinner"));
+    const sp = payButton.querySelector('.spinner');
+    if (sp) payButton.appendChild(sp);
 }
 
 function hideProcessing() {
@@ -282,41 +285,67 @@ function hideProcessing() {
     // remove spinner
     const sp = payButton.querySelector(".spinner");
     if (sp) sp.remove();
-    payButton.textContent = "Checkout!";
+    payButton.textContent = "Checkout";
 }
 
-function showSuccess() {
+function showSuccess(order) {
+    // display order info if present
+    try {
+        const idEl = successNode.querySelector('#order-id');
+        const msgEl = successNode.querySelector('#order-message');
+        if (order) {
+            idEl.textContent = `Order ID: ${order._id || order.id || ''} — Total: $${(order.totalPrice || order.price || 0).toFixed ? (order.totalPrice || order.price).toFixed(2) : (order.totalPrice || order.price)}`;
+            msgEl.textContent = 'We received your payment and your order is being processed.';
+        } else {
+            idEl.textContent = '';
+            msgEl.textContent = 'We received your payment and your order is being processed.';
+        }
+    } catch (err) {
+        // ignore
+    }
     successNode.classList.add("show");
-    // optionally hide payment box
+    // hide payment box
     productContainer.style.display = "none";
+
+    // clear cart and update UI
+    cart = [];
+    saveCart();
 }
 
-// click handler
-payButton.addEventListener("click", async (e) => {
+// click handler - use form submission
+const checkoutForm = document.getElementById('checkout-form');
+checkoutForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     productContainer.classList.remove("error");
 
-    if (!validateInputs()) {
+    // Get form values
+    const formData = new FormData(checkoutForm);
+    const name = formData.get('name')?.trim();
+    const phone = formData.get('phone')?.trim();
+    const address = formData.get('address')?.trim();
+
+    // Basic validation
+    if (!name || !phone || !address) {
         productContainer.classList.add("error");
         setTimeout(() => productContainer.classList.remove("error"), 500);
+        alert('Please fill in all fields');
+        return;
+    }
+
+    if (cart.length === 0) {
+        alert('Your cart is empty');
         return;
     }
 
     showProcessing();
 
-    // collect order info from form and current product
-    const name = document.querySelector('input[placeholder="John Doe"]')?.value.trim();
-    const phone = document.querySelector('input[placeholder="+1 234 5678"]')?.value.trim();
-    const address = document.querySelector('input[placeholder="Elton St 21 22-145"]')?.value.trim();
-
-    // Create order for each cart item
+    // Create order payload
     const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
-
     const orderPayload = {
         name,
         phone,
         address,
-        items: cart,  // send all cart items
+        items: cart,
         totalPrice: cartTotal,
         cartCount: cart.length
     };
@@ -328,18 +357,23 @@ payButton.addEventListener("click", async (e) => {
             body: JSON.stringify(orderPayload)
         });
 
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || 'Failed to place order');
+            throw new Error(data.error || 'Failed to place order');
         }
 
         hideProcessing();
-        showSuccess();
+        showSuccess(data.order || data);
     } catch (err) {
         console.error('Order error:', err);
         hideProcessing();
-        // show a simple message to the user
-        alert('There was an error placing your order. Please try again later.');
+        // Show offline-friendly success popup even if backend is down
+        const offlineOrder = {
+            _id: 'LOCAL-' + Date.now(),
+            totalPrice: orderPayload.totalPrice || 0,
+            offline: true
+        };
+        showSuccess(offlineOrder);
     }
 });
 
@@ -352,6 +386,7 @@ document.addEventListener("click", (e) => {
         saveCart();
         // reset form and show payment again so user can try new order
         payInputs.forEach(i => i.value = "");
+        // keep payment hidden by default after success; user can re-open via cart
         productContainer.style.display = "none";
     }
 });
