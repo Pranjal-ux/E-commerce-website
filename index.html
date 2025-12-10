@@ -16,7 +16,10 @@
     <nav id="nav">
         <div class="navTop">
             <div class="navItem">
-                <img src="./img/sneakers.png" alt="">
+                <img src="./img/sneakers.png" alt="" class="logo">
+            </div>
+            <div class="navItem accountItem">
+                <a id="account-link" href="auth.html">👤 Account</a>
             </div>
             <div class="navItem">
                 <div class="search">
@@ -26,6 +29,10 @@
             </div>
             <div class="navItem">
                 <span class="limitedOffer">Limited Offer!</span>
+            </div>
+            <div class="navItem cartItem" id="cart-icon">
+                <span class="cart-badge" id="cart-count">0</span>
+                🛒
             </div>
         </div>
         <div class="navBottom">
@@ -126,7 +133,7 @@
                 <div class="size">43</div>
                 <div class="size">44</div>
             </div>
-            <button class="productButton">BUY NOW!</button>
+            <button class="productButton" id="add-to-cart-btn">ADD TO CART</button>
         </div>
         <div class="payment">
             <h1 class="payTitle">Personal Information</h1>
@@ -241,7 +248,53 @@
             </div>
         </div>
     </footer>
+    
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <span class="cart-close">&times;</span>
+        </div>
+        <div class="cart-items" id="cart-items-list">
+            <p style="text-align:center;color:#999;">Your cart is empty</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <strong>Total: $</strong><span id="cart-total">0.00</span>
+            </div>
+            <button class="cart-checkout-btn" id="cart-checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    
     <script src="./app.js"></script>
+        <script>
+            // account link helper: show user name if logged in and provide logout
+            (function(){
+                const link = document.getElementById('account-link');
+                try{
+                    const userJson = localStorage.getItem('ecom_user');
+                    if(userJson){
+                        const user = JSON.parse(userJson);
+                        link.textContent = '👤 ' + (user.name || (user.phone || 'Account'));
+                        // change to a logout action
+                        link.href = '#';
+                        link.addEventListener('click', (e)=>{
+                            e.preventDefault();
+                            if(confirm('Sign out?')){
+                                localStorage.removeItem('ecom_user');
+                                link.textContent = '👤 Account';
+                                link.href = 'auth.html';
+                                // optional: reload to update UI
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        link.textContent = '👤 Account';
+                        link.href = 'auth.html';
+                    }
+                }catch(err){ console.error('account link error',err); }
+            })();
+        </script>
 </body>
 
 </html>
